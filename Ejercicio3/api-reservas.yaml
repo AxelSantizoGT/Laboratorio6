@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: API de Administración de Reservas de Hotel
+  description: API para gestionar las reservas de habitaciones de un hotel.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Reservas
+    description: Operaciones sobre reservas de hotel
+
+paths:
+  /api/reservas:
+    post:
+      tags: [Reservas]
+      summary: Crear una nueva reserva
+      operationId: crearReserva
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservaRequest'
+            example:
+              nombreCliente: "Axel Santizo"
+              habitacion: "301"
+              fechaEntrada: "2026-10-01"
+              fechaSalida: "2026-10-05"
+              estado: "CONFIRMADA"
+      responses:
+        '201':
+          description: Reserva creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '400':
+          description: Datos de la solicitud inválidos (por ejemplo, fechaSalida anterior a fechaEntrada)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Reservas]
+      summary: Consultar todas las reservas
+      operationId: consultarReservas
+      parameters:
+        - name: estado
+          in: query
+          required: false
+          description: Filtrar reservas por estado
+          schema:
+            $ref: '#/components/schemas/EstadoReserva'
+      responses:
+        '200':
+          description: Listado de reservas obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservaResponse'
+
+  /api/reservas/{id}:
+    get:
+      tags: [Reservas]
+      summary: Consultar una reserva por id
+      operationId: consultarReservaPorId
+      parameters:
+        - $ref: '#/components/parameters/ReservaId'
+      responses:
+        '200':
+          description: Reserva encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '404':
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags: [Reservas]
+      summary: Actualizar una reserva existente
+      operationId: actualizarReserva
+      parameters:
+        - $ref: '#/components/parameters/ReservaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservaRequest'
+      responses:
+        '200':
+          description: Reserva actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '400':
+          description: Datos de la solicitud inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Reservas]
+      summary: Cancelar una reserva
+      description: Marca la reserva como CANCELADA en lugar de eliminarla físicamente.
+      operationId: cancelarReserva
+      parameters:
+        - $ref: '#/components/parameters/ReservaId'
+      responses:
+        '200':
+          description: Reserva cancelada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '404':
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    ReservaId:
+      name: id
+      in: path
+      required: true
+      description: Identificador único de la reserva
+      schema:
+        type: integer
+        format: int64
+      example: 1
+
+  schemas:
+    EstadoReserva:
+      type: string
+      description: Estado actual de la reserva
+      enum: [CONFIRMADA, PENDIENTE, CANCELADA, FINALIZADA]
+
+    ReservaRequest:
+      type: object
+      required: [nombreCliente, habitacion, fechaEntrada, fechaSalida, estado]
+      properties:
+        nombreCliente:
+          type: string
+          example: "Axel Santizo"
+        habitacion:
+          type: string
+          example: "301"
+        fechaEntrada:
+          type: string
+          format: date
+          example: "2026-10-01"
+        fechaSalida:
+          type: string
+          format: date
+          example: "2026-10-05"
+        estado:
+          $ref: '#/components/schemas/EstadoReserva'
+
+    ReservaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nombreCliente:
+          type: string
+          example: "Axel Santizo"
+        habitacion:
+          type: string
+          example: "301"
+        fechaEntrada:
+          type: string
+          format: date
+          example: "2026-10-01"
+        fechaSalida:
+          type: string
+          format: date
+          example: "2026-10-05"
+        estado:
+          $ref: '#/components/schemas/EstadoReserva'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Reserva con id 1 no encontrada"
+        path:
+          type: string
+          example: "/api/reservas/1"

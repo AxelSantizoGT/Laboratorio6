@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: API de Administración de Libros
+  description: API para gestionar los libros de una biblioteca.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Libros
+    description: Operaciones sobre libros de la biblioteca
+
+paths:
+  /api/libros:
+    post:
+      tags: [Libros]
+      summary: Registrar un nuevo libro
+      operationId: registrarLibro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibroRequest'
+            example:
+              titulo: "Cien años de soledad"
+              autor: "Gabriel García Márquez"
+              isbn: "978-0307474728"
+              anioPublicacion: 1967
+              estado: "DISPONIBLE"
+      responses:
+        '201':
+          description: Libro creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibroResponse'
+        '400':
+          description: Datos de la solicitud inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe un libro con el mismo ISBN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Libros]
+      summary: Consultar todos los libros
+      operationId: consultarLibros
+      parameters:
+        - name: estado
+          in: query
+          required: false
+          description: Filtrar libros por estado
+          schema:
+            $ref: '#/components/schemas/EstadoLibro'
+      responses:
+        '200':
+          description: Listado de libros obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LibroResponse'
+
+  /api/libros/{id}:
+    get:
+      tags: [Libros]
+      summary: Consultar un libro por id
+      operationId: consultarLibroPorId
+      parameters:
+        - $ref: '#/components/parameters/LibroId'
+      responses:
+        '200':
+          description: Libro encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibroResponse'
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags: [Libros]
+      summary: Actualizar un libro existente
+      operationId: actualizarLibro
+      parameters:
+        - $ref: '#/components/parameters/LibroId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibroRequest'
+      responses:
+        '200':
+          description: Libro actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibroResponse'
+        '400':
+          description: Datos de la solicitud inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Libros]
+      summary: Eliminar un libro
+      operationId: eliminarLibro
+      parameters:
+        - $ref: '#/components/parameters/LibroId'
+      responses:
+        '204':
+          description: Libro eliminado exitosamente
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/libros/titulo/{titulo}:
+    get:
+      tags: [Libros]
+      summary: Consultar libros por título
+      operationId: consultarLibroPorTitulo
+      parameters:
+        - name: titulo
+          in: path
+          required: true
+          description: Título (o parte del título) del libro a buscar
+          schema:
+            type: string
+          example: "Cien años de soledad"
+      responses:
+        '200':
+          description: Libros encontrados que coinciden con el título
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LibroResponse'
+        '404':
+          description: No se encontraron libros con ese título
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    LibroId:
+      name: id
+      in: path
+      required: true
+      description: Identificador único del libro
+      schema:
+        type: integer
+        format: int64
+      example: 1
+
+  schemas:
+    EstadoLibro:
+      type: string
+      description: Estado actual del libro
+      enum: [DISPONIBLE, PRESTADO, EN_REPARACION, BAJA]
+
+    LibroRequest:
+      type: object
+      required: [titulo, autor, isbn, anioPublicacion, estado]
+      properties:
+        titulo:
+          type: string
+          example: "Cien años de soledad"
+        autor:
+          type: string
+          example: "Gabriel García Márquez"
+        isbn:
+          type: string
+          example: "978-0307474728"
+        anioPublicacion:
+          type: integer
+          example: 1967
+        estado:
+          $ref: '#/components/schemas/EstadoLibro'
+
+    LibroResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        titulo:
+          type: string
+          example: "Cien años de soledad"
+        autor:
+          type: string
+          example: "Gabriel García Márquez"
+        isbn:
+          type: string
+          example: "978-0307474728"
+        anioPublicacion:
+          type: integer
+          example: 1967
+        estado:
+          $ref: '#/components/schemas/EstadoLibro'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Libro con id 1 no encontrado"
+        path:
+          type: string
+          example: "/api/libros/1"

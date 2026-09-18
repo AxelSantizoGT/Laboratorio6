@@ -1,0 +1,35 @@
+### Registrar libro
+POST http://localhost:8081/api/libros
+Content-Type: application/json
+
+{
+  "titulo": "Cien años de soledad",
+  "autor": "Gabriel García Márquez",
+  "isbn": "978-0307474728",
+  "anioPublicacion": 1967,
+  "estado": "DISPONIBLE"
+}
+
+### Consultar todos los libros
+GET http://localhost:8081/api/libros
+
+### Consultar libro por id
+GET http://localhost:8081/api/libros/1
+
+### Consultar libro por título
+GET http://localhost:8081/api/libros/titulo/soledad
+
+### Actualizar libro
+PUT http://localhost:8081/api/libros/1
+Content-Type: application/json
+
+{
+  "titulo": "Cien años de soledad",
+  "autor": "Gabriel García Márquez",
+  "isbn": "978-0307474728",
+  "anioPublicacion": 1967,
+  "estado": "PRESTADO"
+}
+
+### Eliminar libro
+DELETE http://localhost:8081/api/libros/1

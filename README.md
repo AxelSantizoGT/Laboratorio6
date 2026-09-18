@@ -120,17 +120,3 @@ curl -X PUT http://localhost:8083/api/reservas/1 \
 curl -X DELETE http://localhost:8083/api/reservas/1
 ```
 
-> También puedes importar cada archivo `.yaml` de diseño en [Swagger Editor](https://editor.swagger.io/) para visualizarlo, o usar Postman/Insomnia para las pruebas en lugar de `curl`.
-
-## Control de versiones
-
-```bash
-git init
-git add .
-git commit -m "Laboratorio VI: diseño y desarrollo de APIs REST (libros, cursos, reservas)"
-git branch -M main
-git remote add origin <URL_DE_TU_REPOSITORIO>
-git push -u origin main
-```
-
-Recuerda hacer commits incrementales por ejercicio (o por avance) para evidenciar el historial, en lugar de un único commit final.
